@@ -1,0 +1,6 @@
+[assessment]
+name = "CorpGuard FastAPI Bench"
+green_agent = "scenarios.corpguard.corpguard_judge:CorpGuardJudge"
+
+[participants]
+purple_agent = "agentbeats.agents.echo:EchoAgent"
