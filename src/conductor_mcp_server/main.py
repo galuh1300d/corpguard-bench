@@ -18,15 +18,23 @@ async def route_task(task: TaskRequest):
 
 @app.post("/validate_safety", response_model=SafetyResponse)
 async def validate_safety(req: OperationRequest):
-    op = req.operation.lower()
+    try:
+        # Check security violations (jailbreak, context poisoning, etc.)
+        security_check(req.operation)
+        is_safe = True
+    except Exception:
+        # Security check failed = unsafe operation
+        is_safe = False
     
-    if "ignore safety" in op:
-        return {"is_safe": False, "requires_elicitation": False}
-
-    if "delete" in op or "drop" in op:
-        return {"is_safe": True, "requires_elicitation": True}
-
-    return {"is_safe": True, "requires_elicitation": False}
+    try:
+        # Check if elicitation is required (destructive operations)
+        elicitation_check(req.operation)
+        requires_elicitation = False
+    except Exception:
+        # Elicitation check failed = requires human confirmation
+        requires_elicitation = True
+    
+    return {"is_safe": is_safe, "requires_elicitation": requires_elicitation}
 
 @app.post("/execute")
 async def execute(req: OperationRequest):
